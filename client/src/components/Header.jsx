@@ -2,7 +2,6 @@ import { Navbar, NavbarBrand, NavbarToggle, NavbarCollapse, NavbarLink, Button} 
 import favicon from '../assets/favicon.png'
 import { FaMoon } from "react-icons/fa";
 import { useLocation } from 'react-router-dom';
-import { use } from 'react';
 
 
 const Header = () => {
