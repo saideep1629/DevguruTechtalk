@@ -1,13 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import userRouter from './routes/user.route.js';
+import authRouter from './routes/auth.route.js';
 
 const app = express();
+
+app.use(express.json());
 
 dotenv.config({
   path: "./.env",
 });
 
+// db connection function
 const connectDB = async () => {
   try {
     const connectInstance = await mongoose.connect(
@@ -19,6 +24,7 @@ const connectDB = async () => {
   }
 };
 
+// Start server only after DB connection
 connectDB()
   .then(() => {
     app.listen(process.env.PORT || 8000, () => {
@@ -28,3 +34,10 @@ connectDB()
   .catch((err) => {
     console.log("server connection failed", err);
   });
+
+
+  //routes
+  app.use('/user', userRouter);
+  app.use('/auth', authRouter);
+  
+  
