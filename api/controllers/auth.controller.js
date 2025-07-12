@@ -1,13 +1,27 @@
 import User from "../models/user.model.js";
+import validator from 'validator'
+import bcryptjs from "bcryptjs";
 
 const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     // console.log("req", req.body);
 
-    if (!username || !email || !password) {
+    if (!username?.trim() || !email?.trim() || !password?.trim()) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
+    }
+
+    const hashPassword = bcryptjs.hashSync(password, 10);
 
     const existingUser = await User.findOne({ username });
 
@@ -20,7 +34,7 @@ const signup = async (req, res) => {
     const userDetails = await User.create({
       username,
       email,
-      password,
+      password: hashPassword,
     });
 
     return res.status(201).json(userDetails);
