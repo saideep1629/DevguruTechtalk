@@ -1,49 +1,45 @@
 import User from "../models/user.model.js";
 import validator from 'validator'
 import bcryptjs from "bcryptjs";
+import errorHandler from "../utils/error.js";
 
-const signup = async (req, res) => {
+
+const signup = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
-    // console.log("req", req.body);
 
     if (!username?.trim() || !email?.trim() || !password?.trim()) {
-      return res.status(400).json({ message: "All fields are required" });
+      next(errorHandler(400, "All fields are required"));
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+      next(errorHandler(400, "Invalid email format"));
     }
 
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 6 characters" });
+      next(errorHandler(400, "Password must be at least 6 characters"));
     }
 
-    const hashPassword = bcryptjs.hashSync(password, 10);
+    const hashedPassword = bcryptjs.hashSync(password, 10);
 
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({$or: [{ username }, {email}]});
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "already a user. Can't create account" });
+      next(errorHandler(400, "Username or email already exists"));
     }
 
     const userDetails = await User.create({
       username,
       email,
-      password: hashPassword,
+      password: hashedPassword,
     });
 
     return res.status(201).json(userDetails);
   } catch (error) {
-    console.error("signup error", error);
-    return res
-      .status(500)
-      .json({ message: "server error. Please try again later" });
+    next(errorHandler(500, "Server error. Please try again later"));
   }
-};
+  };
+
+
 
 export { signup };

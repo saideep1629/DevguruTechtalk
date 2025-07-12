@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import userRouter from './routes/user.route.js';
-import authRouter from './routes/auth.route.js';
+import userRouter from "./routes/user.route.js";
+import authRouter from "./routes/auth.route.js";
 
 const app = express();
 
@@ -18,7 +18,9 @@ const connectDB = async () => {
     const connectInstance = await mongoose.connect(
       `${process.env.MONGODB_URL}/${process.env.DB_NAME}`
     );
-    console.log(`connected successfully and host is ${connectInstance.connection.host}`);
+    console.log(
+      `connected successfully and host is ${connectInstance.connection.host}`
+    );
   } catch (error) {
     console.log("MONGODB connection failed", error);
   }
@@ -35,9 +37,16 @@ connectDB()
     console.log("server connection failed", err);
   });
 
+//routes
+app.use("/user", userRouter);
+app.use("/auth", authRouter);
 
-  //routes
-  app.use('/user', userRouter);
-  app.use('/auth', authRouter);
-  
-  
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message =  err.message || 'Internal sever error';
+  res.status(statusCode).json({
+    success: false,
+    message
+  });
+});
+
