@@ -8,7 +8,7 @@ const Header = () => {
    const path = useLocation().pathname;
 
   return (
-    <Navbar className="border-b-2">
+    <Navbar className="fixed top-0 left-0 w-full z-50 border-b-2 bg-white dark:bg-gray-900">
       <NavbarBrand>
         <img src={favicon} className="mr-3 h-6 sm:h-9 rounded-xl" alt="Logo"/>
         <span className='self-center whitespace-nowrap text-xl font-semibold dark:text-white'>Devguru's Techtalk</span>
