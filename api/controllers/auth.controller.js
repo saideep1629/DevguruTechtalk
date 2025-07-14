@@ -9,15 +9,15 @@ const signup = async (req, res, next) => {
     const { username, email, password } = req.body;
 
     if (!username?.trim() || !email?.trim() || !password?.trim()) {
-      next(errorHandler(400, "All fields are required"));
+      return next(errorHandler(400, "All fields are required"));
     }
 
     if (!validator.isEmail(email)) {
-      next(errorHandler(400, "Invalid email format"));
+      return next(errorHandler(400, "Invalid email format"));
     }
 
     if (password.length < 6) {
-      next(errorHandler(400, "Password must be at least 6 characters"));
+      return next(errorHandler(400, "Password must be at least 6 characters"));
     }
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
@@ -25,7 +25,7 @@ const signup = async (req, res, next) => {
     const existingUser = await User.findOne({$or: [{ username }, {email}]});
 
     if (existingUser) {
-      next(errorHandler(400, "Username or email already exists"));
+      return next(errorHandler(400, "Username or email already exists"));
     }
 
     const userDetails = await User.create({
@@ -34,9 +34,9 @@ const signup = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    return res.status(201).json(userDetails);
+    return res.status(201).json({userDetails, message: "User created successfully"});
   } catch (error) {
-    next(errorHandler(500, "Server error. Please try again later"));
+    return next(errorHandler(500, "Server error. Please try again later"));
   }
   };
 

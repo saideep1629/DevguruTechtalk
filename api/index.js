@@ -39,7 +39,7 @@ connectDB()
 
 //routes
 app.use("/user", userRouter);
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
