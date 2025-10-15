@@ -119,15 +119,105 @@ const signin = async (req, res) => {
       .json(new ApiResponse(200, validUser, "User signin successfully"));
   } catch (error) {
     return res
-      .status(error.statusCode || 500) 
+      .status(error.statusCode || 500)
+      .json(new ApiResponse(error.statusCode || 500, null, error.message));
+  }
+};
+
+const googleAuth = async (req, res) => {
+  try {
+    console.log("before");
+    
+    const { email, name, photoUrl } = req.body;
+    console.log("email", name);
+    
+    
+
+    // if (!email || !username || email === "" || username === "") {
+    //   throw new ApiError(400, "details are missing");
+    // }
+    // console.log("after");
+
+    const user = await User.findOne({ email });
+    console.log("user", user);
+    
+
+    if (user) {
+      const token = jwt.sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_ACCESS_TOKEN_KEY,
+        { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY }
+      );
+
+      if (!token) {
+        throw new ApiError(404, "token not generated properly!!!");
+      }
+
+      const options = {
+        httpOnly: true,
+        secure: false,
+      };
+
+      const validUser = await User.findOne({ email }).select("-password");
+
+      return res
+        .status(200)
+        .cookie("accessToken", token, options)
+        .json(new ApiResponse(200, validUser, "User signin successfully"));
+    } else {
+      const generatedPassword = email + process.env.JWT_ACCESS_TOKEN_KEY;
+      const hashedPassword = bcrypt.hashSync(generatedPassword, 10);
+
+      const newUser = await User.create({
+        username:
+          name.toLowerCase().split(" ").join("") +
+          Math.floor(Math.random() * 100),
+        email: email,
+        password: hashedPassword,
+        profilePicture: photoUrl,
+      });
+
+      const createdUser = await User.findById(newUser._id).select("-password");
+
+      if (!createdUser) {
+        throw new ApiError(400, "User not created properly");
+      }
+
+      const token = jwt.sign(
+        {
+          id: newUser._id,
+        },
+        process.env.JWT_ACCESS_TOKEN_KEY,
+        { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY }
+      );
+
+      if (!token) {
+        throw new ApiError(404, "token not generated properly!!!");
+      }
+
+      const options = {
+        httpOnly: true,
+        secure: false,
+      };
+
+      return res
+        .status(200)
+        .cookie("accessToken", token, options)
+        .json(new ApiResponse(200, createdUser, "User signin successfully"));
+    }
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500) // use provided status or fallback
       .json(
         new ApiResponse(
-          error.statusCode || 500, 
-          null, 
-          error.message 
+          error.statusCode || 500, // same status in response body
+          null, // no data on error
+          error.message // error details
         )
       );
   }
 };
 
-export { signup, signin };
+export { signup, signin, googleAuth };

@@ -8,6 +8,8 @@ import {
 } from "../features/userSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 
+import OAuth from "../components/OAuth.jsx";
+
 function Signin() {
   const [formData, setFormData] = useState({});
   const navigate = useNavigate();
@@ -90,6 +92,7 @@ function Signin() {
               >
                 {loading ? "Loading..." : "Sign In"}
               </button>
+              <OAuth />
             </div>
           </form>
 

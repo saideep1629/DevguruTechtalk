@@ -6,7 +6,7 @@ function FooterComp() {
   const currentYear = date.getFullYear();
 
   return (
-    <Footer container className="rounded-none">
+    <Footer container className="rounded-none mb-[-25px]">
       <div className="w-full text-center">
         <div className="w-full justify-between sm:flex sm:items-center sm:justify-between">
           <FooterBrand
